@@ -1,5 +1,5 @@
 ### Assembly and Annotation Course
-> Ianis Vilela
+> Ianis Vilela, 14-706-584
 ---
 
 This repository provides the scripts used for the "Genome and Transcriptome Assembly" and "Organization and Annotation of Eukaryote Genomes" courses. Script names contain enumeration that corresponds to their execution order. Exceptions are elaborated here.
