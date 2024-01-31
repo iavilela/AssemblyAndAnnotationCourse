@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=4G
+#SBATCH --time=02:00:00
+#SBATCH --job-name=datingTEs
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/output_TEdater_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/error_TEdater_%j.e
+#SBATCH --partition=pall
+
+# Create dedicated workingdirectory
+mkdir /data/users/ivilela/assembly_annotation_course/datingTEs
+
+# Move to new directory
+cd /data/users/ivilela/assembly_annotation_course/datingTEs
+
+# Run parseRM
+perl parseRM.pl -i ../EDTA/pilonFlye.fasta.mod.EDTA.anno/pilonFlye.fasta.mod.out -l 50,1 -v
+
+cp ../EDTA/pilonFlye.fasta.mod.EDTA.anno/pilonFlye.fasta.mod.out.landscape.Div.Rname.tab ./
+
+# Remove first and third line
+sed -i '1d;3d' ./pilonFlye.fasta.mod.out.landscape.Div.Rname.tab

@@ -1,0 +1,77 @@
+#!/usr/bin/env bash
+
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=4G
+#SBATCH --time=02:00:00
+#SBATCH --job-name=TEsorter
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/output_TEsorter_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/error_TEsorter_%j.e
+#SBATCH --partition=pall
+
+# load module
+module load UHTS/Analysis/SeqKit/0.13.2
+
+# Create dedicated workingdirectory
+mkdir /data/users/ivilela/assembly_annotation_course/TEsorter
+
+# Move to new directory
+cd /data/users/ivilela/assembly_annotation_course/TEsorter
+
+# Define directories
+output_dir=/data/users/ivilela/assembly_annotation_course/TEsorter
+input_dir=/data/users/ivilela/assembly_annotation_course/EDTA
+course_dir=/data/courses/assembly-annotation-course/
+
+### Assembly Genome
+## Extract copia and gypsy LTR
+# copia
+grep -A1 "Copia" ${input_dir}/pilonFlye.fasta.mod.EDTA.TElib.fa | grep -v -- "^--$" > ${output_dir}/CopiaLibrary.fa
+
+# gypsy
+grep -A1 "Gypsy" ${input_dir}/pilonFlye.fasta.mod.EDTA.TElib.fa | grep -v -- "^--$" > ${output_dir}/GypsyLibrary.fa
+
+## Run TEsorter
+# copia
+singularity exec \
+--bind $course_dir \
+--bind $input_dir \
+${course_dir}/containers2/TEsorter_1.3.0.sif \
+TEsorter ${output_dir}/CopiaLibrary.fa -db rexdb-plant
+
+# gypsy
+singularity exec \
+--bind $course_dir \
+--bind $input_dir \
+${course_dir}/containers2/TEsorter_1.3.0.sif \
+TEsorter ${output_dir}/GypsyLibrary.fa -db rexdb-plant
+
+
+### Brassicaceae genome
+## Extract copia and gypsy LTR
+# copia
+grep -A1 'Copia' ${course_dir}/CDS_annotation/Brassicaceae_repbase_all_march2019.fasta | grep -v -- "^--$" > ${output_dir}/CopiaLibraryBra.fa
+
+# gypsy
+grep -A1 'Gypsy' ${course_dir}/CDS_annotation/Brassicaceae_repbase_all_march2019.fasta | grep -v "^--$" > ${output_dir}/GypsyLibraryBra.fa
+
+## Run TEsorter
+# copia
+singularity exec \
+--bind $course_dir \
+--bind $input_dir \
+${course_dir}/containers2/TEsorter_1.3.0.sif \
+TEsorter ${output_dir}/CopiaLibraryBra.fa -db rexdb-plant
+
+# gypsy
+singularity exec \
+--bind $course_dir \
+--bind $input_dir \
+${course_dir}/containers2/TEsorter_1.3.0.sif \
+TEsorter ${output_dir}/GypsyLibraryBra.fa -db rexdb-plant
+
+
+#Old grep approach using seqkit
+# seqkit grep \
+# -p 'Gypsy' \
+# /data/users/ivilela/assembly_annotation_course/EDTA/*.mod.EDTA.TElib.fa \
+# -o /data/users/ivilela/assembly_annotation_course/TEsorter/GypsyLibrary.fa

@@ -1,0 +1,37 @@
+#!/usr/bin/env bash
+
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=4G
+#SBATCH --time=02:00:00
+#SBATCH --job-name=phylogeneticAnalysis
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/output_PhyloAna_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/error_PhyloAna_%j.e
+#SBATCH --partition=pall
+
+# Load modules
+module load SequenceAnalysis/MultipleSequenceAlignment/clustal-omega/1.2.4
+module load Phylogeny/FastTree/2.1.10
+module load UHTS/Analysis/SeqKit/0.13.2
+
+# Create dedicated workingdirectory
+mkdir /data/users/ivilela/assembly_annotation_course/PhyloAnaTEs
+
+# Move to new directory
+cd /data/users/ivilela/assembly_annotation_course/PhyloAnaTEs
+
+# Extract RT protein sequences
+grep Ty1-RT ../TEsorter/CopiaLibrary.fa.rexdb-plant.dom.faa > RTproteinListCopia
+
+sed -i 's/>//' RTproteinListCopia
+sed -i 's/ .\+//' RTproteinListCopia
+
+seqkit grep -f RTproteinListCopia ../TEsorter/CopiaLibrary.fa.rexdb-plant.dom.faa -o Copia_RT.fasta
+
+# Shorten identifiers of RT sequences
+sed -i 's/|.\+//' ./Copia_RT.fasta
+
+# Align the sequences with clustal omega
+clustalo -i ./Copia_RT.fasta -o CopiaProteinAlignment.fasta
+
+# Create phylogenetic tree
+FastTree -out CopiaProteinAlignment.tree CopiaProteinAlignment.fasta

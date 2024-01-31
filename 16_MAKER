@@ -1,0 +1,125 @@
+#!/usr/bin/env bash
+
+#SBATCH --time=0-48:00:00
+#SBATCH --mem-per-cpu=12G
+#SBATCH --nodes=1
+#SBATCH --ntasks-per-node=16
+#SBATCH --partition=pall
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/maker_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/maker_%j.e
+
+# Load modules
+module load SequenceAnalysis/GenePrediction/maker/2.31.9
+
+# Define directories
+COURSEDIR=/data/courses/assembly-annotation-course
+PROJDIR=/data/users/ivilela/assembly_annotation_course
+WORKDIR=/data/users/ivilela/assembly_annotation_course/annotation
+SOFTWAREDIR=/software
+PROTEINDIR=/mnt/software/SequenceAnalysis/GenePrediction/maker/2.31.9/data
+
+#export SLURM_EXPORT_ENV=ALL
+#export LIBDIR=/software/SequenceAnalysis/Repeat/RepeatMasker/4.0.7/Libraries
+# export REPEATMASKER_DIR=/software/SequenceAnalysis/Repeat/RepeatMasker/4.0.7/RepeatMasker
+
+# Change Directory
+cd $WORKDIR
+
+# Create control files
+#singularity exec --bind $SCRATCH --bind $WORKDIR --bind $COURSEDIR \
+#$COURSEDIR/containers2/MAKER_3.01.03.sif \
+#maker -CTL
+
+# Run maker
+mpiexec -n 16 singularity exec \
+--bind ${SCRATCH} \
+--bind ${COURSEDIR} \
+--bind ${SOFTWAREDIR} \
+--bind ${PROJDIR} \
+${COURSEDIR}/containers2/MAKER_3.01.03.sif \
+maker -mpi -base pilonFlye maker_opts.ctl maker_bopts.ctl maker_exe.ctl
+
+
+
+
+
+
+
+# Run maker
+#mpiexec -n 16 singularity exec \
+#--bind ${SCRATCH} \
+#--bind ${COURSEDIR} \
+#--bind ${PROJDIR} \
+#--bind ${SOFTWAREDIR} \
+#--bind ${PROTEINDIR} \
+#${COURSEDIR}/containers2/MAKER_3.01.03.sif \
+#maker -mpi -base "pilonFlye" maker_opts.ctl maker_bopts.ctl maker_exe.ctl
+
+
+
+
+
+
+
+# mpiexec -n 16 singularity exec \
+# --bind $SCRATCH:/TMP --bind $COURSEDIR --bind $WORKDIR \
+# $COURSEDIR/containers2/MAKER_3.01.03.sif \
+# maker -mpi --ignore_nfs_tmp -TMP /TMP maker_opts.ctl maker_bopts.ctl maker_exe.ctl
+
+# mpiexec -n 16 singularity exec --bind $SCRATCH:/TMP /data/courses/assembly-annotation-course/containers2/MAKER_3.01.03.sif maker -mpi --ignore_nfs_tmp -TMP /TMP maker_opts.ctl maker_bopts.ctl maker_exe.ctl
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Define other dictionaries and variables that are used
+#    COURSE_DIR=/data/courses/assembly-annotation-course
+#    software_dir=/software
+
+#Specify directory structure and create them
+#    course_dir=/data/users/srasch/assembly_course
+#        TE_annotation_dir=${course_dir}/07_TE_annotation
+
+#    mkdir ${TE_annotation_dir}
+
+#Go to folder where results should be stored.
+#    cd ${TE_annotation_dir}
+
+#Copy data files from Monsur to RawData and make soft link course folder
+#    cp /data/users/mfaye/assembly_course/data/assemblies/trinity_out/assembly.fasta ${course_dir}/RawData
+
+#Create control files
+# singularity exec \
+# --bind $SCRATCH \
+# --bind ${COURSE_DIR} \
+# --bind ${course_dir} \
+# --bind ${software_dir} \
+# ${COURSE_DIR}/containers2/MAKER_3.01.03.sif \
+# maker -CTL
+    #Options entered here are:
+        #"singularity exec": execute container with given options
+        #"--bind": a user-bind path specification.
+        #"${COURSE_DIR}/containers2/MAKER_3.01.03.sif": Singularity Image Format container to be executed
+        #"maker": command to be executed
+        #"-CTL": Generate empty control files in the current directory.
+
+#Run MAKER with MPI
+#mpiexec -n 16 singularity exec \
+#--bind $SCRATCH \
+#--bind ${COURSE_DIR} \
+#--bind ${course_dir} \
+#--bind ${software_dir} \
+#${COURSE_DIR}/containers2/MAKER_3.01.03.sif \
+#maker -mpi maker_opts.ctl maker_bopts.ctl maker_exe.ctl

@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+#SBATCH --cpus-per-task=50
+#SBATCH --mem=10G
+#SBATCH --time=04:00:00
+#SBATCH --job-name=EDTA
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/output_mummer_flye_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/error_mummer_flye_%j.e
+#SBATCH --partition=pall
+
+# store current directory
+cwd=$(pwd)
+
+# Create dedicated workingdirectory
+mkdir /data/users/ivilela/assembly_annotation_course/EDTA
+
+#set variable for directory paths
+COURSEDIR=/data/courses/assembly-annotation-course
+WORKDIR=/data/users/ivilela/assembly_annotation_course
+
+# Move to working directory
+cd $WORKDIR/EDTA
+
+# Run EDTA with Flye assembly
+singularity exec \
+--bind $COURSEDIR \
+--bind $WORKDIR \
+$COURSEDIR/containers2/EDTA_v1.9.6.sif \
+EDTA.pl \
+--genome $WORKDIR/bowtie/pilonFlye.fasta \
+--species others \
+--step all \
+--cds $COURSEDIR/CDS_annotation/TAIR10_cds_20110103_representative_gene_model_updated \
+--anno 1 \
+--threads 50
+
+# Return to original directory
+cd $cwd

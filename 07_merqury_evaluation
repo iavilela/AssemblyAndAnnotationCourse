@@ -1,0 +1,105 @@
+#!/usr/bin/env bash
+
+#SBATCH --time=3-00:00:00
+#SBATCH --cpus-per-task=4
+#SBATCH --mem=64G
+#SBATCH --job-name=AssemblyEval
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/output_bowtie_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/error_bowtie__%j.e
+#SBATCH --partition=pall
+
+# Define paths
+WORKDIR=/data/users/mberger/assembly_course
+DATADIR=/data/courses/assembly-annotation-course
+read_dir=${WORKDIR}/participant_4/Illumina
+meryl_dir=${WORKDIR}/evaluations/meryl
+
+# Go to working directory for meryl
+cd ${meryl_dir}/
+
+# load modules
+java -Xmx45g -jar /mnt/software/UHTS/Analysis/pilon/1.22/bin/pilon-1.22.jar
+module add UHTS/Assembler/canu/2.1.1
+
+# Store current directory in variable
+cwd=$(pwd)
+
+# Move to data directory of user
+cd /data/users/${USER}/assembly_annotation_course
+PROJDIR=/data/users/${USER}/assembly_annotation_course
+read_dir=/data/users/${USER}/assembly_annotation_course/participant_5/Illumina
+
+# Create directory for evaluation
+mkdir ./merquryEvaluations
+mkdir ./merquryEvaluations/meryl
+cd ./merquryEvaluations/meryl
+
+# Count and combine the kmers from the forward and backward reads
+# Count and combine the kmers from the forward and backward reads
+#singularity exec \
+#--bind $PROJDIR \
+#/software/singularity/containers/Merqury-1.3-1.ubuntu20.sif \
+#meryl union-sum output union.meryl [count k=21 ${read_dir}/ERR3624574_1.fastq.gz output read1.meryl] [count k=21 ${read_dir}/ERR3624574_2.fastq.gz output read2.meryl]
+
+meryl k=19 count output ${PROJDIR}/merquryEvaluations/meryl/read_1.meryl ${read_dir}/*1.fastq.gz
+meryl k=19 count output ${PROJDIR}/merquryEvaluations/meryl/read_2.meryl ${read_dir}/*2.fastq.gz
+meryl union-sum output ${PROJDIR}/merquryEvaluations/meryl/genome.meryl ${PROJDIR}/merquryEvaluations/meryl/read_*.meryl
+
+
+# switch directory
+cd ../
+
+# Run container with merqury
+apptainer exec \
+--bind $PROJDIR \
+/software/singularity/containers/Merqury-1.3-1.ubuntu20.sif \
+merqury.sh ${PROJDIR}/merquryEvaluation/meryl/genome.meryl ${PROJDIR}/flye/assembly.fasta flye_unpol
+
+apptainer exec \
+--bind $PROJDIR \
+/software/singularity/containers/Merqury-1.3-1.ubuntu20.sif \
+merqury.sh ${PROJDIR}/merquryEvaluation/meryl/genome.meryl ${PROJDIR}/pacbioCanu/pacbioCanuAssembly.contigs.fasta canu_unpol
+
+apptainer exec \
+--bind $PROJDIR \
+/software/singularity/containers/Merqury-1.3-1.ubuntu20.sif \
+merqury.sh ${PROJDIR}/merquryEvaluation/meryl/genome.meryl ${PROJDIR}/bowtie/pilonFlye flye_pol
+
+apptainer exec \
+--bind $PROJDIR \
+/software/singularity/containers/Merqury-1.3-1.ubuntu20.sif \
+merqury.sh ${PROJDIR}/merquryEvaluation/meryl/genome.meryl ${PROJDIR}/bowtie/pilonCanu canu_pol
+
+# Move to original directory
+cd $cwd
+
+
+
+
+# Define input and output directories
+#course_dir=/data/users/rschwob/01_assembly_annotation_course
+#meryl_dir=${course_dir}/results/3_polishing_3_quality_assessment_3_merqury/illumina.meryl
+#output_parent_dir=${course_dir}/results/3_polishing_3_quality_assessment_3_merqury
+# mkdir ${output_parent_dir}
+
+# Define input file and options
+# NOTE: CHOOSE THE ONE TO USE (OUT-COMMENT THE OTHERS)
+
+# assembly=${course_dir}/results/3_polishing_2_pilon/pilon_bt2_flye.fasta
+# output_tag=flye_polished
+
+# assembly=${course_dir}/results/3_polishing_2_pilon/pilon_bt2_canu.fasta
+# output_tag=canu_polished
+
+# assembly=${course_dir}/results/2_assembly_1_flye/pacbio/assembly.fasta
+# output_tag=flye_original
+
+# Run merqury
+#output_dir=${output_parent_dir}/${output_tag}
+#mkdir ${output_dir}
+#cd ${output_dir}
+#apptainer exec \
+#--bind ${course_dir} \
+#/software/singularity/containers/Merqury-1.3-1.ubuntu20.sif \
+#merqury.sh ${meryl_dir} ${assembly} ${output_tag}
+

@@ -1,0 +1,92 @@
+#!/usr/bin/env bash
+
+#SBATCH --cpus-per-task=2
+#SBATCH --mem=4G
+#SBATCH --time=02:00:00
+#SBATCH --job-name=Busco
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/output_FinalizeAnnotation_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/error_FinalizeAnnotation_%j.e
+#SBATCH --partition=pall
+
+
+# Load modules
+module add UHTS/Analysis/busco/4.1.4
+module load Blast/ncbi-blast/2.10.1+
+
+# Move to directory
+cd /data/users/ivilela/assembly_annotation_course/annotation/pilonFlye.maker.output
+
+cp -r /software/SequenceAnalysis/GenePrediction/augustus/3.3.3.1/config augustus_config
+export AUGUSTUS_CONFIG_PATH=./augustus_config
+
+# Apply BUSCO to predicted MAKER proteins
+busco -i pilonFlye.all.maker.proteins.fasta.renamed.fasta -l brassicales_odb10 -m proteins -c 10 -o busco
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

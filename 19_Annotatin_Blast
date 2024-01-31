@@ -1,0 +1,36 @@
+#!/usr/bin/env bash
+
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=32G
+#SBATCH --time=02:00:00
+#SBATCH --job-name=Busco
+#SBATCH --output=/data/users/ivilela/assembly_annotation_course/output_FinalizeAnnotation_%j.o
+#SBATCH --error=/data/users/ivilela/assembly_annotation_course/error_FinalizeAnnotation_%j.e
+#SBATCH --partition=pall
+
+# Load modules
+module add UHTS/Analysis/busco/4.1.4
+module load Blast/ncbi-blast/2.10.1+
+module load SequenceAnalysis/GenePrediction/maker/2.31.9;
+
+# Move to directory
+cd /data/users/ivilela/assembly_annotation_course/annotation/pilonFlye.maker.output
+
+cp -r /software/SequenceAnalysis/GenePrediction/augustus/3.3.3.1/config augustus_config
+export AUGUSTUS_CONFIG_PATH=./augustus_config
+
+# Sequence Homology to functionally validated proteins
+#makeblastdb -in /data/courses/assembly-annotation-course/CDS_annotation/MAKER/uniprot_viridiplantae_reviewed.fa -dbtype prot
+
+#blastp -query pilonFlye.all.maker.proteins.fasta.renamed.fasta -db /data/courses/assembly-annotation-course/CDS_annotation/MAKER/uniprot_viridiplantae_reviewed.fa -num_threads 10 -outfmt 6 -evalue 1e-10 -out blastp_output
+
+
+# map functions to MAKER output
+blast_output_dir=/data/users/ivilela/assembly_annotation_course/annotation/pilonFlye.maker.output
+pilonFlye.all.maker.noseq.gff.renamed.gff
+
+cp $blast_output_dir/pilonFlye.all.maker.proteins.fasta.renamed.fasta $blast_output_dir/pilonFlye.all.maker.proteins.fasta.renamed.fasta.Uniprot
+cp $blast_output_dir/pilonFlye.all.maker.noseq.gff.renamed.gff $blast_output_dir/pilonFlye.all.maker.noseq.gff.renamed.gff.Uniprot
+
+maker_functional_fasta $blast_output_dir/pilonFlye.all.maker.protein.fasta.renamed.fasta $blast_output_dir/blastp_output $blast_output_dir/pilonFlye.all.maker.proteins.fasta.renamed.fasta.Uniprot
+maker_functional_gff $blast_output_dir/pilonFlye.all.maker.noseq.gff.renamed.gff $blast_output_dir/blastp_output $blast_output_dir/pilonFlye.all.maker.noseq.gff.renamed.gff.Uniprot
