@@ -2,7 +2,7 @@
 > Ianis Vilela, 14-706-584
 ---
 
-This repository provides the scripts used for the "Genome and Transcriptome Assembly" and "Organization and Annotation of Eukaryote Genomes" courses. Script names contain enumeration that corresponds to their execution order. Exceptions are elaborated here.
+This repository provides the scripts used for the "Genome and Transcriptome Assembly" and "Organization and Annotation of Eukaryote Genomes" courses. Script names contain enumeration that corresponds to their execution order. Exceptions/additions are elaborated here.
 
 *generate_plot* was used whenever BUSCO output files were visualized. In this project this was after *08_busco_evaluation.sh* and *18_Annotation_Assessment*. 
 
